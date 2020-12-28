@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>환율계산</title>
+        <meta http-equiv="Content-Type" content="text/html";charset="UTF-8" />
+    </head>
+    <body>
+        <h1>환율계산</h1>
+        <p>송금국가: 미국(USD)</p>
+        <p>수취국가:
+            <select id="currency-code">
+                <option value="KRW">한국(KRW)</option>
+                <option value="JPY">일본(JPY)</option>
+                <option value="PHP">필리핀(PHP)</option>
+            </select>
+        </p>
+        <p>환율: <span id="currency"></span></p>
+        <p>송금액: <input id="amount"/>USD</p>
+        <button id="submitBtn" type="submit">Submit</button>
+        <br>
+        <p>수취금액은 <span id="result"></span>입니다</p>
+        <script>
+            function getCurrency(code) {
+                fetch('/api/currency?code=' + code)
+                        .then(function (res) {
+                            return res.json();
+                        }).then(function (res) {
+                    currencyText.innerText = res.quotes['USD' + code] + ' ' + code + '/USD';
+                })
+            }
+            var currencyCode = document.getElementById('currency-code');
+            var currencyText = document.getElementById('currency');
+            currencyCode.onchange = function (ev) {
+                var code = ev.target.value;
+                getCurrency(code);
+            }
+            var amountText = document.getElementById('amount');
+            var resultText = document.getElementById('result');
+            var submitBtn = document.getElementById('submitBtn');
+            submitBtn.onclick = function (ev) {
+                if (!amountText.value) {
+                    alert('송금액을 입력해주세요.');
+                    return;
+                }
+
+                var amount = parseInt(amountText.value, 10);
+
+                if (amount < 0 || amount >= 10000 || isNaN(amount)) {
+                    alert('송금액이 바르지 않습니다.');
+                    return;
+                }
+
+                var code = currencyCode.value;
+                var currency = parseFloat(currencyText.innerText);
+                resultText.innerText = (amount * currency) + ' ' + code;
+            }
+
+            getCurrency(currencyCode.value);
+        </script>
+    </body>
+</html>
